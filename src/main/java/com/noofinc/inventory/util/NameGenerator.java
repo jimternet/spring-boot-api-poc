@@ -1,4 +1,4 @@
-package com.noofinc.inventory;
+package com.noofinc.inventory.util;
 
 import java.util.ArrayList;
 import java.util.Arrays;

@@ -16,3 +16,7 @@ spring-boot-api-poc
 2. use the create table scripts to create necessary tables in C*
 3. build the project using maven
 4. Run by either using the maven plugin or running the main class in the Application class.
+5. Maven = mvn clean test spring-boot:run
+6. goto http://localhost:8080/index.html
+7. Change the url in the page from "http://petstore.swagger.wordnik.com/api/api-docs" to "http://localhost:8080/api-docs"
+8. PROFIT!!

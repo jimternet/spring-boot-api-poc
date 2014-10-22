@@ -39,6 +39,7 @@ public class InventoryController {
 	@RequestMapping(value = "/inventory", method = RequestMethod.GET)
 	@ApiOperation(httpMethod = "GET", value = "get all inventory records")
 	public @ResponseBody Iterable<Inventory> getAllInventory() {
+		
 		return inventoryRepo.findAll();
 	}
 

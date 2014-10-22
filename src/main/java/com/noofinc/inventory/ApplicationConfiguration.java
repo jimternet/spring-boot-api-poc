@@ -12,6 +12,7 @@ import org.springframework.context.annotation.ComponentScan;
 import org.springframework.context.annotation.Configuration;
 
 import com.noofinc.inventory.repositories.InventoryRepository;
+import com.noofinc.inventory.repositories.RetailProductLocationRepository;
 
 
 @Configuration
@@ -22,5 +23,8 @@ public class ApplicationConfiguration {
 	
 	@Autowired
 	InventoryRepository inventoryRepository;
+	
+	@Autowired
+	RetailProductLocationRepository retailProductLocationRepository;
 	
 }

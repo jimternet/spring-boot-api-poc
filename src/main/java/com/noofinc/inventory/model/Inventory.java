@@ -1,10 +1,12 @@
 package com.noofinc.inventory.model;
 
+import java.io.Serializable;
+
 import org.springframework.data.cassandra.mapping.PrimaryKey;
 import org.springframework.data.cassandra.mapping.Table;
 
 @Table
-public class Inventory {
+public class Inventory  implements Serializable {
 	
 	
 	@PrimaryKey
