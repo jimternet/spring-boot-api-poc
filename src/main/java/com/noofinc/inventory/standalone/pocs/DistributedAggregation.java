@@ -9,6 +9,7 @@ import com.codahale.metrics.MetricRegistry;
 import com.codahale.metrics.Snapshot;
 import com.codahale.metrics.Timer;
 import com.hazelcast.config.Config;
+import com.hazelcast.config.ManagementCenterConfig;
 import com.hazelcast.core.Hazelcast;
 import com.hazelcast.core.HazelcastInstance;
 import com.hazelcast.core.IMap;
@@ -30,6 +31,11 @@ public class DistributedAggregation {
 		DistributedAggregation ag = new DistributedAggregation();
 		startReport();
 		Config config = new Config();
+		ManagementCenterConfig managementCenterConfig = new ManagementCenterConfig();
+		managementCenterConfig.setEnabled(true);
+		managementCenterConfig.setUrl("http://localhost:8080/mancenter-3.3.2");
+		config.setManagementCenterConfig(managementCenterConfig );
+		
 		HazelcastInstance h = Hazelcast.newHazelcastInstance(config);
 
 		IMap<String, Integer> salaries = h.getMap("salaries");
@@ -80,7 +86,7 @@ public class DistributedAggregation {
 
 		for (int i = 0; i < count; i++) {
 			Inventory inv = randomInventory();
-			inventories.put(inv.getId(), inv);
+			inventories.put(inv.getInventory_id(), inv);
 		}
 
 	}
@@ -159,7 +165,7 @@ public class DistributedAggregation {
 
 	private Inventory randomInventory() {
 		Inventory inventory = new Inventory();
-		inventory.setId(randomName());
+		inventory.setInventory_id(randomName());
 		inventory.setDemand((int) (Math.random() * 100));
 		inventory.setSupply((int) (Math.random() * 100));
 		return inventory;

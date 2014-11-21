@@ -23,7 +23,7 @@ import com.datastax.driver.core.Session;
 // @TestExecutionListeners({ CassandraUnitTestExecutionListener.class })
 @TestExecutionListeners({ CassandraUnitTestExecutionListener.class })
 
-@CassandraDataSet(value = { "cql/inventory1.cql" }, keyspace = "test")
+@CassandraDataSet(value = { "cql/inventory1.cql" }, keyspace = "esv")
 @EmbeddedCassandra
 public class ApplicationTests {
 
@@ -42,11 +42,11 @@ public class ApplicationTests {
 	            .addContactPoints("127.0.0.1")
 	            .withPort(9042)
 	            .build();
-	        Session session = cluster.connect("test");
+	        Session session = cluster.connect("esv");
 	        
 		
 		ResultSet result = session
-				.execute("select * from inventory WHERE id='x'");
+				.execute("select * from inventory WHERE inventory_id='x'");
 
 		int val = result.iterator().next().getInt("supply");
 //		assertEquals(5, val);

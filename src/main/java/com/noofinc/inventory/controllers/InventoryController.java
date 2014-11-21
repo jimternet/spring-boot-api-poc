@@ -5,12 +5,14 @@ import java.util.concurrent.locks.Lock;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.ModelAttribute;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.ResponseBody;
+import org.springframework.web.bind.annotation.ResponseStatus;
 import org.springframework.web.bind.annotation.RestController;
 
 import com.hazelcast.core.HazelcastInstance;
@@ -29,6 +31,9 @@ public class InventoryController {
 	InventoryRepository inventoryRepo;
 
 	@Autowired
+	Inventory inventory;
+	
+	@Autowired
 	HazelcastInstance hazelcastInstance;
 
 	@RequestMapping("/")
@@ -37,14 +42,14 @@ public class InventoryController {
 	}
 
 	@RequestMapping(value = "/inventory", method = RequestMethod.GET)
-	@ApiOperation(httpMethod = "GET", value = "get all inventory records")
+	@ApiOperation(httpMethod = "GET", value = "get all inventory records", notes ="This Operation should return all the records that we ahve in the table.")
 	public @ResponseBody Iterable<Inventory> getAllInventory() {
 		
 		return inventoryRepo.findAll();
 	}
 
 	@RequestMapping(value = "/inventory/{id}", method = { RequestMethod.GET })
-	@ApiOperation(httpMethod = "GET", value = "get an inventory record")
+	@ApiOperation(httpMethod = "GET", value = "get an inventory record", notes="this returns one inventory record by it's inventory ID" )
 	public @ResponseBody Inventory getInventory(@PathVariable("id") String id) {
 		return inventoryRepo.findOne(id);
 	}
@@ -56,8 +61,8 @@ public class InventoryController {
 
 		if (inventory == null) {
 			throw new Exception();
-		} else if (inventoryRepo.findOne(inventory.getId()) != null) {
-			LOG.error("You can't create this record : " + inventory.getId()
+		} else if (inventoryRepo.findOne(inventory.getInventory_id()) != null) {
+			LOG.error("You can't create this record : " + inventory.getInventory_id()
 					+ " it already exsits");
 			throw new Exception();
 		}
@@ -76,12 +81,12 @@ public class InventoryController {
 			throw new Exception();
 		}
 
-		Lock lock = hazelcastInstance.getLock(inventory.getId());
+		Lock lock = hazelcastInstance.getLock(inventory.getInventory_id());
 
 		lock.lock();
 		try {
 			System.out.println(inventory);
-			if (inventoryRepo.findOne(inventory.getId()) == null) {
+			if (inventoryRepo.findOne(inventory.getInventory_id()) == null) {
 				throw new Exception();
 			}
 
@@ -102,7 +107,7 @@ public class InventoryController {
 		
 
 		Inventory inventory = inventoryRepo.findOne(id);
-		if (inventoryRepo.findOne(inventory.getId()) == null) {
+		if (inventoryRepo.findOne(inventory.getInventory_id()) == null) {
 			throw new Exception();
 		}
 		
@@ -121,7 +126,7 @@ public class InventoryController {
 		
 		
 		Inventory inventory = inventoryRepo.findOne(id);
-		if (inventoryRepo.findOne(inventory.getId()) == null) {
+		if (inventoryRepo.findOne(inventory.getInventory_id()) == null) {
 			throw new Exception();
 		}
 		inventory.setDemand(demand);
@@ -129,5 +134,8 @@ public class InventoryController {
 		return inventory;
 
 	}
+	
+	
+
 
 }
