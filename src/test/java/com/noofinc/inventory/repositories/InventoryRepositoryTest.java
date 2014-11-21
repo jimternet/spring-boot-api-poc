@@ -2,9 +2,7 @@ package com.noofinc.inventory.repositories;
 
 import static org.junit.Assert.*;
 
-import org.cassandraunit.spring.CassandraDataSet;
-import org.cassandraunit.spring.CassandraUnitTestExecutionListener;
-import org.cassandraunit.spring.EmbeddedCassandra;
+
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -22,7 +20,6 @@ import com.noofinc.inventory.Application;
 @WebAppConfiguration
 //@TestExecutionListeners({ CassandraUnitTestExecutionListener.class })
 //@CassandraDataSet(value = { "cql/inventory1.cql" }, keyspace = "test")
-//@EmbeddedCassandra
 public class InventoryRepositoryTest {
 	
 	@Autowired

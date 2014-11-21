@@ -8,7 +8,7 @@ import com.noofinc.inventory.model.Inventory;
 import com.noofinc.inventory.model.RetailProductLocation;
 import com.noofinc.inventory.model.RetailProductLocationPrimaryKey;
 
-//@Repository
+@Repository
 public interface RetailProductLocationRepository extends CrudRepository<RetailProductLocation, RetailProductLocationPrimaryKey> {
 
 }
