@@ -36,10 +36,7 @@ public class InventoryController {
 	@Autowired
 	HazelcastInstance hazelcastInstance;
 
-	@RequestMapping("/")
-	public String index() {
-		return "Greetings from Spring Boot!";
-	}
+
 
 	@RequestMapping(value = "/inventory", method = RequestMethod.GET)
 	@ApiOperation(httpMethod = "GET", value = "get all inventory records", notes ="This Operation should return all the records that we ahve in the table.")
