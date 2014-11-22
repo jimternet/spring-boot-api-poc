@@ -13,7 +13,7 @@ public interface InventoryRepository extends CrudRepository<Inventory, String> {
 
 	@Override
 //	@CachePut(value="book", key="#isbn")
-    @Cacheable(value = "inventory", key="#inventory_id")
+//    @Cacheable(value = "inventory", key="#inventory_id")
 //    @Cacheable(value = "inventory")
 	Inventory findOne(String inventory_id);
 	
@@ -28,7 +28,7 @@ public interface InventoryRepository extends CrudRepository<Inventory, String> {
 //	@CacheEvict(value = "inventories", allEntries=true)
 //	@Caching(evict = { @CacheEvict(value = "inventories", allEntries=true), @CacheEvict(value = "inventory", key = "#inventory.id") })
 //	@Caching(evict = { @CacheEvict(value = "inventories", allEntries=true), @CacheEvict(value = "inventory")})
-	@CacheEvict(value = "inventory", key = "#inventory.inventory_id")
+//	@CacheEvict(value = "inventory", key = "#inventory.inventory_id")
 	Inventory save(Inventory inventory);
 
     
