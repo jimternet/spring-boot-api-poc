@@ -1,5 +1,6 @@
 package com.noofinc.inventory.controllers;
 
+import java.util.List;
 import java.util.concurrent.locks.Lock;
 
 import org.slf4j.Logger;
@@ -39,16 +40,20 @@ public class InventoryController {
 
 
 	@RequestMapping(value = "/inventory", method = RequestMethod.GET)
-	@ApiOperation(httpMethod = "GET", value = "get all inventory records", notes ="This Operation should return all the records that we ahve in the table.")
-	public @ResponseBody Iterable<Inventory> getAllInventory() {
+	@ApiOperation(httpMethod = "GET", hidden=false, nickname="Get All",
+	value = "get all inventory records"
+//	, notes ="This Operation should return all the records that we ahve in the table."
+	)
+	public @ResponseBody List<Inventory> getAllInventory() {
 		
-		return inventoryRepo.findAll();
+		return (List<Inventory>) inventoryRepo.findAll();
 	}
 
-	@RequestMapping(value = "/inventory/{id}", method = { RequestMethod.GET })
-	@ApiOperation(httpMethod = "GET", value = "get an inventory record", notes="this returns one inventory record by it's inventory ID" )
-	public @ResponseBody Inventory getInventory(@PathVariable("id") String id) {
-		return inventoryRepo.findOne(id);
+	@RequestMapping(value = "/inventory/{inventory_id}", method = { RequestMethod.GET })
+	@ApiOperation(httpMethod = "GET", nickname="Get One", value = "get an inventory record", notes="this returns one inventory record by it's inventory ID" )
+	public @ResponseBody Inventory getInventory(@PathVariable("inventory_id") String inventory_id) {
+		LOG.info("about to search for inventory with key : " + inventory_id);
+		return inventoryRepo.findOne(inventory_id);
 	}
 
 	@RequestMapping(value = "/inventory/", method = { RequestMethod.POST })
@@ -58,11 +63,12 @@ public class InventoryController {
 
 		if (inventory == null) {
 			throw new Exception();
-		} else if (inventoryRepo.findOne(inventory.getInventory_id()) != null) {
-			LOG.error("You can't create this record : " + inventory.getInventory_id()
-					+ " it already exsits");
-			throw new Exception();
-		}
+		} 
+//		else if (inventoryRepo.findOne(inventory.getInventory_id()) != null) {
+//			LOG.error("You can't create this record : " + inventory.getInventory_id()
+//					+ " it already exsits");
+//			throw new Exception();
+//		}
 
 		inventoryRepo.save(inventory);
 
@@ -70,7 +76,7 @@ public class InventoryController {
 	}
 
 	@RequestMapping(value = "/inventory/", method = { RequestMethod.PUT })
-	@ApiOperation(httpMethod = "PUT", value = "Update an inventory record")
+	@ApiOperation(httpMethod = "PUT", value = "Update one inventory record")
 	public @ResponseBody Inventory putInventory(@RequestBody Inventory inventory)
 			throws Exception {
 
@@ -97,13 +103,13 @@ public class InventoryController {
 	}
 
 	// Update supply by id
-	@RequestMapping(value = "/inventory/{id}/supply/{supply}", method = { RequestMethod.PUT })
+	@RequestMapping(value = "/inventory/{inventory_id}/supply/{supply}", method = { RequestMethod.PUT })
 	@ApiOperation(httpMethod = "PUT", value = "Update an inventory records supply")
-	public @ResponseBody Inventory updateSupply(@PathVariable("id") String id,
+	public @ResponseBody Inventory updateSupply(@PathVariable("inventory_id") String inventory_id,
 			@PathVariable("supply") int supply) throws Exception {
 		
 
-		Inventory inventory = inventoryRepo.findOne(id);
+		Inventory inventory = inventoryRepo.findOne(inventory_id);
 		if (inventoryRepo.findOne(inventory.getInventory_id()) == null) {
 			throw new Exception();
 		}
@@ -115,14 +121,14 @@ public class InventoryController {
 	}
 
 	// Update demand by id
-	@RequestMapping(value = "/inventory/{id}/demand/{demand}", method = { RequestMethod.PUT })
+	@RequestMapping(value = "/inventory/{inventory_id}/demand/{demand}", method = { RequestMethod.PUT })
 	@ApiOperation(httpMethod = "PUT", value = "Update an inventory records demand")
-	public @ResponseBody Inventory updateDemand(@PathVariable("id") String id,
+	public @ResponseBody Inventory updateDemand(@PathVariable("inventory_id") String inventory_id,
 			@PathVariable("demand") int demand) throws Exception {
 
 		
 		
-		Inventory inventory = inventoryRepo.findOne(id);
+		Inventory inventory = inventoryRepo.findOne(inventory_id);
 		if (inventoryRepo.findOne(inventory.getInventory_id()) == null) {
 			throw new Exception();
 		}

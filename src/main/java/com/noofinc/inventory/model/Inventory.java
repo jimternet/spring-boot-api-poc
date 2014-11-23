@@ -32,8 +32,8 @@ public class Inventory  implements Serializable {
 	public String getInventory_id() {
 		return inventory_id;
 	}
-	public void setInventory_id(String id) {
-		this.inventory_id = id;
+	public void setInventory_id(String inventory_id) {
+		this.inventory_id = inventory_id;
 	}
 	public int getSupply() {
 		return supply;
