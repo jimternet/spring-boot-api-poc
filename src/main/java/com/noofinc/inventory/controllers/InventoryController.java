@@ -82,9 +82,12 @@ public class InventoryController {
 	public @ResponseBody Inventory putInventory(@RequestBody Inventory inventory)
 			throws Exception {
 
+
 		if (inventory == null) {
 			throw new Exception();
 		}
+
+		LOG.info("just before lock : " + inventory.toString());
 
 		Lock lock = hazelcastInstance.getLock(inventory.getInventory_id());
 
@@ -95,6 +98,7 @@ public class InventoryController {
 				throw new Exception();
 			}
 
+			LOG.info("just before save : " + inventory.toString());
 			inventoryRepo.saveInventory(inventory);
 		} finally {
 			LOG.info("unlocking");
