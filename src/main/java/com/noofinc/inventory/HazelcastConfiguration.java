@@ -15,7 +15,9 @@ public class HazelcastConfiguration {
 	
 //	@Value("#{systemProperties['pop3.port'] ?: 25}")
 	
-	@Value("#{systemProperties['h.url'] ?: 'http://localhost:8080/mancenter-3.3.2'}")
+//	@Value("#{systemProperties['h.url'] ?: 'http://localhost:8080/mancenter-3.3.2'}")
+	
+	@Value("${hz_url}")
 	private String hazelCastManagementUrl;
 
 
