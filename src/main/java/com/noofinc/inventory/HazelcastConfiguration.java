@@ -1,5 +1,6 @@
 package com.noofinc.inventory;
 
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 
@@ -13,6 +14,9 @@ import com.hazelcast.spring.cache.HazelcastCacheManager;
 public class HazelcastConfiguration {
 	
 //	@Value("#{systemProperties['pop3.port'] ?: 25}")
+	
+	@Value("#{systemProperties['h.url'] ?: 'http://localhost:8080/mancenter-3.3.2'}")
+	private String hazelCastManagementUrl;
 
 
 	@Bean
@@ -21,7 +25,7 @@ public class HazelcastConfiguration {
 		
 		ManagementCenterConfig managementCenterConfig = new ManagementCenterConfig();
 		managementCenterConfig.setEnabled(true);
-		managementCenterConfig.setUrl("http://localhost:8080/mancenter-3.3.2");
+		managementCenterConfig.setUrl(hazelCastManagementUrl);
 		config.setManagementCenterConfig(managementCenterConfig );
 		HazelcastInstance h = Hazelcast.newHazelcastInstance(config);
 		return h;
