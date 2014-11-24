@@ -1,6 +1,10 @@
 package com.noofinc.inventory;
 
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.cache.CacheManager;
+import org.springframework.cache.annotation.CachingConfigurer;
+import org.springframework.cache.interceptor.KeyGenerator;
+import org.springframework.cache.interceptor.SimpleKeyGenerator;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 
@@ -14,7 +18,7 @@ import com.hazelcast.core.HazelcastInstance;
 import com.hazelcast.spring.cache.HazelcastCacheManager;
 
 @Configuration
-public class HazelcastConfiguration {
+public class HazelcastConfiguration implements CachingConfigurer {
 	
 //	@Value("#{systemProperties['pop3.port'] ?: 25}")
 	
@@ -56,6 +60,7 @@ public class HazelcastConfiguration {
 	}
 	
 
+
 	
 	@Bean 
 	public HazelcastCacheManager cacheManager(HazelcastInstance hazelcastInstance){
@@ -63,6 +68,18 @@ public class HazelcastConfiguration {
 		cacheManager.setHazelcastInstance(hazelcastInstance);
 		return cacheManager;
 		
+	}
+
+	@Override
+	public CacheManager cacheManager() {
+		HazelcastCacheManager cacheManager = new HazelcastCacheManager();
+		cacheManager.setHazelcastInstance(hazelcastInstance(hazelcastConfig()));
+		return cacheManager;
+	}
+
+	@Override
+	public KeyGenerator keyGenerator() {
+		return new SimpleKeyGenerator();
 	}
 
 	//http://localhost:8080/mancenter-3.3.2

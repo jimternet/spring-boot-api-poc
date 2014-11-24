@@ -21,7 +21,7 @@ import com.hazelcast.query.Predicates;
 import com.noofinc.inventory.model.Inventory;
 import com.noofinc.inventory.model.RetailProductLocation;
 import com.noofinc.inventory.model.RetailProductLocationPrimaryKey;
-import com.noofinc.inventory.repositories.InventoryRepository;
+import com.noofinc.inventory.repositories.InventoryRepositoryCustom;
 import com.noofinc.inventory.repositories.RetailProductLocationRepository;
 import com.wordnik.swagger.annotations.ApiOperation;
 

@@ -19,7 +19,7 @@ import org.springframework.web.bind.annotation.RestController;
 import com.hazelcast.core.HazelcastInstance;
 import com.noofinc.inventory.CassandraConfig;
 import com.noofinc.inventory.model.Inventory;
-import com.noofinc.inventory.repositories.InventoryRepository;
+import com.noofinc.inventory.repositories.InventoryRepositoryCustom;
 import com.wordnik.swagger.annotations.ApiOperation;
 
 @RestController
@@ -29,7 +29,7 @@ public class InventoryController {
 			.getLogger(InventoryController.class);
 
 	@Autowired
-	InventoryRepository inventoryRepo;
+	InventoryRepositoryCustom inventoryRepo;
 
 	@Autowired
 	Inventory inventory;

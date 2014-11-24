@@ -5,7 +5,7 @@ import org.springframework.boot.autoconfigure.EnableAutoConfiguration;
 import org.springframework.context.annotation.ComponentScan;
 import org.springframework.context.annotation.Configuration;
 
-import com.noofinc.inventory.repositories.InventoryRepository;
+import com.noofinc.inventory.repositories.InventoryRepositoryCustom;
 import com.noofinc.inventory.repositories.RetailProductLocationRepository;
 
 
@@ -16,7 +16,7 @@ public class ApplicationConfiguration {
 	
 	
 	@Autowired
-	InventoryRepository inventoryRepository;
+	InventoryRepositoryCustom inventoryRepository;
 	
 	@Autowired
 	RetailProductLocationRepository retailProductLocationRepository;

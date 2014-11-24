@@ -8,7 +8,7 @@ import org.springframework.stereotype.Component;
 
 @Table
 @Component
-public class Inventory  implements Serializable {
+public class Inventory implements Serializable {
 	
 	
 	/**
@@ -52,6 +52,38 @@ public class Inventory  implements Serializable {
 		return "Inventory [id=" + inventory_id + ", supply=" + supply + ", demand="
 				+ demand + "]";
 	}
+	@Override
+	public int hashCode() {
+		final int prime = 31;
+		int result = 1;
+		result = prime * result + demand;
+		result = prime * result
+				+ ((inventory_id == null) ? 0 : inventory_id.hashCode());
+		result = prime * result + supply;
+		return result;
+	}
+	@Override
+	public boolean equals(Object obj) {
+		if (this == obj)
+			return true;
+		if (obj == null)
+			return false;
+		if (getClass() != obj.getClass())
+			return false;
+		Inventory other = (Inventory) obj;
+		if (demand != other.demand)
+			return false;
+		if (inventory_id == null) {
+			if (other.inventory_id != null)
+				return false;
+		} else if (!inventory_id.equals(other.inventory_id))
+			return false;
+		if (supply != other.supply)
+			return false;
+		return true;
+	}
+	
+	
 	
 	
 	
