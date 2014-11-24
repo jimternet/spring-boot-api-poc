@@ -8,6 +8,7 @@ import com.hazelcast.config.Config;
 import com.hazelcast.config.JoinConfig;
 import com.hazelcast.config.ManagementCenterConfig;
 import com.hazelcast.config.NetworkConfig;
+import com.hazelcast.config.TcpIpConfig;
 import com.hazelcast.core.Hazelcast;
 import com.hazelcast.core.HazelcastInstance;
 import com.hazelcast.spring.cache.HazelcastCacheManager;
@@ -24,9 +25,9 @@ public class HazelcastConfiguration {
 
 	@Value("${hz_members}")
 	private String hazelcastMembers;
-
+	
 	@Bean
-	public HazelcastInstance hazelcastInstance() {
+	public Config hazelcastConfig(){
 		Config config = new Config();
 		
 		
@@ -34,7 +35,9 @@ public class HazelcastConfiguration {
 		networkConfig.setPort(5900);
 		networkConfig.setPortAutoIncrement(false);
 		JoinConfig join = networkConfig.getJoin();
-		join.getTcpIpConfig().addMember(hazelcastMembers);
+		TcpIpConfig tcpIpConfig = join.getTcpIpConfig();
+		tcpIpConfig.addMember(hazelcastMembers);
+		tcpIpConfig.setEnabled(true);
 
 		join.getMulticastConfig().setEnabled(false);
 
@@ -42,7 +45,13 @@ public class HazelcastConfiguration {
 		managementCenterConfig.setEnabled(true);
 		managementCenterConfig.setUrl(hazelCastManagementUrl);
 		config.setManagementCenterConfig(managementCenterConfig );
-		HazelcastInstance h = Hazelcast.newHazelcastInstance(config);
+		return config;
+	}
+
+	@Bean
+	public HazelcastInstance hazelcastInstance(Config hazelcastConfig) {
+
+		HazelcastInstance h = Hazelcast.newHazelcastInstance(hazelcastConfig);
 		return h;
 	}
 	
