@@ -19,7 +19,9 @@ import org.springframework.web.bind.annotation.RestController;
 import com.hazelcast.core.HazelcastInstance;
 import com.noofinc.inventory.CassandraConfig;
 import com.noofinc.inventory.model.Inventory;
+import com.noofinc.inventory.repositories.InventoryRepository;
 import com.noofinc.inventory.repositories.InventoryRepositoryCustom;
+import com.noofinc.inventory.repositories.InventoryRepositoryImpl;
 import com.wordnik.swagger.annotations.ApiOperation;
 
 @RestController
@@ -29,7 +31,7 @@ public class InventoryController {
 			.getLogger(InventoryController.class);
 
 	@Autowired
-	InventoryRepositoryCustom inventoryRepo;
+	InventoryRepository inventoryRepo;
 
 	@Autowired
 	Inventory inventory;
@@ -46,14 +48,14 @@ public class InventoryController {
 	)
 	public @ResponseBody List<Inventory> getAllInventory() {
 		
-		return (List<Inventory>) inventoryRepo.findAll();
+		return (List<Inventory>) inventoryRepo.findAllInventory();
 	}
 
 	@RequestMapping(value = "/inventory/{inventory_id}", method = { RequestMethod.GET })
 	@ApiOperation(httpMethod = "GET", nickname="Get One", value = "get an inventory record", notes="this returns one inventory record by it's inventory ID" )
 	public @ResponseBody Inventory getInventory(@PathVariable("inventory_id") String inventory_id) {
 		LOG.info("about to search for inventory with key : " + inventory_id);
-		return inventoryRepo.findOne(inventory_id);
+		return inventoryRepo.findOneInventory(inventory_id);
 	}
 
 	@RequestMapping(value = "/inventory/", method = { RequestMethod.POST })
@@ -70,7 +72,7 @@ public class InventoryController {
 //			throw new Exception();
 //		}
 
-		inventoryRepo.save(inventory);
+		inventoryRepo.saveInventory(inventory);
 
 		return inventory;
 	}
@@ -89,11 +91,11 @@ public class InventoryController {
 		lock.lock();
 		try {
 			System.out.println(inventory);
-			if (inventoryRepo.findOne(inventory.getInventory_id()) == null) {
+			if (inventoryRepo.findOneInventory(inventory.getInventory_id()) == null) {
 				throw new Exception();
 			}
 
-			inventoryRepo.save(inventory);
+			inventoryRepo.saveInventory(inventory);
 		} finally {
 			LOG.info("unlocking");
 			lock.unlock();
@@ -109,13 +111,13 @@ public class InventoryController {
 			@PathVariable("supply") int supply) throws Exception {
 		
 
-		Inventory inventory = inventoryRepo.findOne(inventory_id);
-		if (inventoryRepo.findOne(inventory.getInventory_id()) == null) {
+		Inventory inventory = inventoryRepo.findOneInventory(inventory_id);
+		if (inventoryRepo.findOneInventory(inventory.getInventory_id()) == null) {
 			throw new Exception();
 		}
 		
 		inventory.setSupply(supply);
-		inventoryRepo.save(inventory);
+		inventoryRepo.saveInventory(inventory);
 		return inventory;
 
 	}
@@ -128,12 +130,12 @@ public class InventoryController {
 
 		
 		
-		Inventory inventory = inventoryRepo.findOne(inventory_id);
-		if (inventoryRepo.findOne(inventory.getInventory_id()) == null) {
+		Inventory inventory = inventoryRepo.findOneInventory(inventory_id);
+		if (inventoryRepo.findOneInventory(inventory.getInventory_id()) == null) {
 			throw new Exception();
 		}
 		inventory.setDemand(demand);
-		inventoryRepo.save(inventory);
+		inventoryRepo.saveInventory(inventory);
 		return inventory;
 
 	}

@@ -4,11 +4,11 @@ import com.noofinc.inventory.model.Inventory;
 
 public interface InventoryRepositoryCustom {
 
-	Inventory findOneInventory(String inventory_id);
+	Inventory findOne(String inventory_id);
 	
-	Iterable<Inventory> findAllInventory();
+	Iterable<Inventory> findAll();
 	
-	Inventory saveInventory(Inventory inventory);
+	Inventory save(Inventory inventory);
 
 
 
