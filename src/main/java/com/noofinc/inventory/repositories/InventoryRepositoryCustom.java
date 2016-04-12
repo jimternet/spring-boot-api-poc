@@ -9,6 +9,8 @@ public interface InventoryRepositoryCustom {
 	Iterable<Inventory> findAllInventory();
 	
 	Inventory saveInventory(Inventory inventory);
+	
+	Integer getCount();
 
 
 

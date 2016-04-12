@@ -3,6 +3,8 @@ package com.noofinc.inventory;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.cache.CacheManager;
 import org.springframework.cache.annotation.CachingConfigurer;
+import org.springframework.cache.interceptor.CacheErrorHandler;
+import org.springframework.cache.interceptor.CacheResolver;
 import org.springframework.cache.interceptor.KeyGenerator;
 import org.springframework.cache.interceptor.SimpleKeyGenerator;
 import org.springframework.context.annotation.Bean;
@@ -11,11 +13,15 @@ import org.springframework.context.annotation.Configuration;
 import com.hazelcast.config.Config;
 import com.hazelcast.config.JoinConfig;
 import com.hazelcast.config.ManagementCenterConfig;
+import com.hazelcast.config.MapConfig;
+import com.hazelcast.config.MapStoreConfig;
 import com.hazelcast.config.NetworkConfig;
 import com.hazelcast.config.TcpIpConfig;
 import com.hazelcast.core.Hazelcast;
 import com.hazelcast.core.HazelcastInstance;
+import com.hazelcast.core.IMap;
 import com.hazelcast.spring.cache.HazelcastCacheManager;
+
 
 @Configuration
 public class HazelcastConfiguration implements CachingConfigurer {
@@ -49,6 +55,15 @@ public class HazelcastConfiguration implements CachingConfigurer {
 		managementCenterConfig.setEnabled(true);
 		managementCenterConfig.setUrl(hazelCastManagementUrl);
 		config.setManagementCenterConfig(managementCenterConfig );
+		
+		MapStoreConfig mapStoreConfig = new MapStoreConfig();
+		mapStoreConfig.setClassName("com.noofinc.inventory.mapstore.RetailProductLocationMapStore");
+		MapConfig retailProductLocationMapConfig = new MapConfig();
+		retailProductLocationMapConfig.setMapStoreConfig(mapStoreConfig );
+		retailProductLocationMapConfig.setName("retailProductLocationMap");
+		config.getMapConfigs().put("retailProductLocationMap", retailProductLocationMapConfig );
+		
+		
 		return config;
 	}
 
@@ -80,6 +95,17 @@ public class HazelcastConfiguration implements CachingConfigurer {
 	@Override
 	public KeyGenerator keyGenerator() {
 		return new SimpleKeyGenerator();
+	}
+
+	@Override
+	public CacheResolver cacheResolver() {
+		return null;
+	}
+
+	@Override
+	public CacheErrorHandler errorHandler() {
+		// TODO Auto-generated method stub
+		return null;
 	}
 
 	//http://localhost:8080/mancenter-3.3.2

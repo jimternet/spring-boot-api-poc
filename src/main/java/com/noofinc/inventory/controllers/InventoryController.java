@@ -41,6 +41,14 @@ public class InventoryController {
 
 
 
+	
+	@RequestMapping(value = "/inventory/count/", method = { RequestMethod.GET })
+	@ApiOperation(httpMethod = "GET", nickname="Count", value = "get an inventory record", notes="this returns one inventory record by it's inventory ID" )
+	public @ResponseBody Integer getCount() {
+		return inventoryRepo.getCount();
+	}
+	
+	
 	@RequestMapping(value = "/inventory", method = RequestMethod.GET)
 	@ApiOperation(httpMethod = "GET", hidden=false, nickname="Get All",
 	value = "get all inventory records"

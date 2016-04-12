@@ -6,7 +6,8 @@ import org.springframework.data.cassandra.mapping.PrimaryKey;
 import org.springframework.data.cassandra.mapping.Table;
 import org.springframework.stereotype.Component;
 
-@Table
+//@Table
+@Table(forceQuote=true, value="lame_inventory")
 @Component
 public class Inventory implements Serializable {
 	
