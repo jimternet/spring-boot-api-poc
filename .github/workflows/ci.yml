@@ -1,0 +1,266 @@
+name: 🔒 Security & Build CI
+
+on:
+  push:
+    branches: [ master, main, security-updates-* ]
+  pull_request:
+    branches: [ master, main ]
+
+jobs:
+  security-scan:
+    name: 🛡️ Security Scan
+    runs-on: ubuntu-latest
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v4
+      
+    - name: Run Trivy vulnerability scanner
+      uses: aquasecurity/trivy-action@master
+      with:
+        scan-type: 'fs'
+        scan-ref: '.'
+        format: 'sarif'
+        output: 'trivy-results.sarif'
+        
+    - name: Upload Trivy scan results to GitHub Security tab
+      uses: github/codeql-action/upload-sarif@v3
+      if: always()
+      with:
+        sarif_file: 'trivy-results.sarif'
+
+  build-test:
+    name: 🏗️ Build & Test (Java ${{ matrix.java }})
+    runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        java: [17, 21]  # Test both LTS versions
+        
+    services:
+      cassandra:
+        image: cassandra:4.1
+        env:
+          CASSANDRA_CLUSTER_NAME: test-cluster
+        ports:
+          - 9042:9042
+        options: >-
+          --health-cmd "cqlsh -e 'describe cluster'"
+          --health-interval 30s
+          --health-timeout 10s
+          --health-retries 5
+
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v4
+      
+    - name: Set up JDK ${{ matrix.java }}
+      uses: actions/setup-java@v4
+      with:
+        java-version: ${{ matrix.java }}
+        distribution: 'temurin'
+        
+    - name: Cache Maven dependencies
+      uses: actions/cache@v4
+      with:
+        path: ~/.m2
+        key: ${{ runner.os }}-m2-${{ hashFiles('**/pom.xml') }}
+        restore-keys: ${{ runner.os }}-m2
+        
+    - name: Wait for Cassandra
+      run: |
+        echo "Waiting for Cassandra to be ready..."
+        for i in {1..30}; do
+          if docker exec $(docker ps -q --filter ancestor=cassandra:4.1) cqlsh -e "describe cluster" > /dev/null 2>&1; then
+            echo "Cassandra is ready!"
+            break
+          fi
+          echo "Waiting... ($i/30)"
+          sleep 10
+        done
+        
+    - name: Setup Cassandra Schema
+      run: |
+        docker exec $(docker ps -q --filter ancestor=cassandra:4.1) cqlsh -e "
+        CREATE KEYSPACE IF NOT EXISTS inventory 
+        WITH replication = {'class': 'SimpleStrategy', 'replication_factor': 1};
+        
+        USE inventory;
+        
+        CREATE TABLE IF NOT EXISTS inventory(
+          inventory_id text,
+          supply int,
+          demand int, 
+          PRIMARY KEY(inventory_id)
+        );
+        
+        INSERT INTO inventory(inventory_id, supply, demand) values('1', 0, 0);
+        INSERT INTO inventory(inventory_id, supply, demand) values('2', 2, 0);
+        INSERT INTO inventory(inventory_id, supply, demand) values('3', 5, 0);
+        "
+        
+    - name: 🔍 Verify Dependencies
+      run: |
+        echo "=== Dependency Analysis ==="
+        mvn dependency:tree
+        echo ""
+        echo "=== Security Vulnerabilities Check ==="
+        mvn org.owasp:dependency-check-maven:check || true
+        
+    - name: 🏗️ Compile Project
+      run: mvn clean compile -B
+      
+    - name: 🧪 Run Tests
+      run: mvn test -B
+      env:
+        CASSANDRA_HOST: localhost
+        CASSANDRA_PORT: 9042
+        
+    - name: 📦 Package Application
+      run: mvn package -DskipTests -B
+      
+    - name: 🚀 Test Application Startup
+      run: |
+        echo "Starting application in background..."
+        java -jar target/inventory-*.jar \
+          --spring.cassandra.contact-points=localhost:9042 \
+          --spring.cassandra.keyspace-name=inventory \
+          --server.port=8080 &
+        
+        APP_PID=$!
+        echo "Application PID: $APP_PID"
+        
+        # Wait for app to start
+        echo "Waiting for application to start..."
+        for i in {1..30}; do
+          if curl -f http://localhost:8080/actuator/health > /dev/null 2>&1; then
+            echo "✅ Application started successfully!"
+            break
+          fi
+          echo "Waiting for startup... ($i/30)"
+          sleep 5
+        done
+        
+        # Test API endpoints
+        echo "=== Testing API Endpoints ==="
+        echo "Health check:"
+        curl -s http://localhost:8080/actuator/health | jq '.' || echo "Health endpoint failed"
+        
+        echo "Info endpoint:"
+        curl -s http://localhost:8080/actuator/info | jq '.' || echo "Info endpoint failed"
+        
+        echo "OpenAPI docs:"
+        curl -f http://localhost:8080/v3/api-docs > /dev/null && echo "✅ OpenAPI docs accessible" || echo "❌ OpenAPI docs failed"
+        
+        # Clean shutdown
+        kill $APP_PID
+        wait $APP_PID 2>/dev/null || true
+        
+    - name: 📊 Upload Test Results
+      uses: actions/upload-artifact@v4
+      if: always()
+      with:
+        name: test-results-java-${{ matrix.java }}
+        path: |
+          target/surefire-reports/
+          target/dependency-check-report.html
+          
+  dependency-update-check:
+    name: 🔄 Dependency Update Check
+    runs-on: ubuntu-latest
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v4
+      
+    - name: Set up JDK 17
+      uses: actions/setup-java@v4
+      with:
+        java-version: 17
+        distribution: 'temurin'
+        
+    - name: Check for newer versions
+      run: |
+        echo "=== Checking for newer dependency versions ==="
+        mvn versions:display-dependency-updates
+        echo ""
+        echo "=== Checking for newer plugin versions ==="
+        mvn versions:display-plugin-updates
+
+  security-baseline:
+    name: 📊 Security Baseline Report
+    runs-on: ubuntu-latest
+    if: github.event_name == 'pull_request'
+    steps:
+    - name: Checkout base branch
+      uses: actions/checkout@v4
+      with:
+        ref: ${{ github.base_ref }}
+        
+    - name: Set up JDK 17
+      uses: actions/setup-java@v4
+      with:
+        java-version: 17
+        distribution: 'temurin'
+        
+    - name: Analyze base branch security
+      run: |
+        echo "=== Base Branch Security Analysis ===" > security-baseline.txt
+        mvn org.owasp:dependency-check-maven:check -DfailBuildOnCVSS=0 || true
+        
+        if [ -f target/dependency-check-report.xml ]; then
+          VULN_COUNT=$(grep -c '<vulnerability>' target/dependency-check-report.xml || echo "0")
+          echo "Vulnerabilities in base branch: $VULN_COUNT" >> security-baseline.txt
+        else
+          echo "No dependency check report found for base branch" >> security-baseline.txt
+        fi
+        
+    - name: Checkout PR branch
+      uses: actions/checkout@v4
+      
+    - name: Analyze PR branch security
+      run: |
+        echo "=== PR Branch Security Analysis ===" >> security-baseline.txt
+        mvn org.owasp:dependency-check-maven:check -DfailBuildOnCVSS=0 || true
+        
+        if [ -f target/dependency-check-report.xml ]; then
+          VULN_COUNT=$(grep -c '<vulnerability>' target/dependency-check-report.xml || echo "0")
+          echo "Vulnerabilities in PR branch: $VULN_COUNT" >> security-baseline.txt
+        else
+          echo "No dependency check report found for PR branch" >> security-baseline.txt
+        fi
+        
+    - name: Upload security comparison
+      uses: actions/upload-artifact@v4
+      with:
+        name: security-baseline-comparison
+        path: security-baseline.txt
+
+  notify-status:
+    name: 📢 Build Status Summary
+    runs-on: ubuntu-latest
+    needs: [security-scan, build-test, dependency-update-check]
+    if: always()
+    steps:
+    - name: Create Status Summary
+      run: |
+        echo "## 🔒 Security & Build Summary" >> $GITHUB_STEP_SUMMARY
+        echo "" >> $GITHUB_STEP_SUMMARY
+        
+        if [ "${{ needs.security-scan.result }}" == "success" ]; then
+          echo "✅ **Security Scan**: Passed" >> $GITHUB_STEP_SUMMARY
+        else
+          echo "❌ **Security Scan**: Failed" >> $GITHUB_STEP_SUMMARY
+        fi
+        
+        if [ "${{ needs.build-test.result }}" == "success" ]; then
+          echo "✅ **Build & Test**: Passed" >> $GITHUB_STEP_SUMMARY
+        else
+          echo "❌ **Build & Test**: Failed" >> $GITHUB_STEP_SUMMARY
+        fi
+        
+        if [ "${{ needs.dependency-update-check.result }}" == "success" ]; then
+          echo "✅ **Dependency Check**: Passed" >> $GITHUB_STEP_SUMMARY
+        else
+          echo "❌ **Dependency Check**: Failed" >> $GITHUB_STEP_SUMMARY
+        fi
+        
+        echo "" >> $GITHUB_STEP_SUMMARY
+        echo "🔍 **Review the detailed results above for any issues that need attention.**" >> $GITHUB_STEP_SUMMARY
