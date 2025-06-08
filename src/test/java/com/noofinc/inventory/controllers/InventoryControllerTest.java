@@ -3,6 +3,12 @@ package com.noofinc.inventory.controllers;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertThrows;
+import static org.junit.jupiter.api.Assertions.assertTrue;
+
+import java.util.concurrent.CountDownLatch;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
+import java.util.concurrent.TimeUnit;
 
 import org.junit.jupiter.api.AfterAll;
 import org.junit.jupiter.api.BeforeEach;
@@ -102,5 +108,43 @@ public class InventoryControllerTest {
         Integer count = inventoryController.getCount();
         assertNotNull(count);
         assertEquals(1, count); // We created one inventory item in setup
+    }
+
+    @Test
+    public void testConcurrentUpdates() throws Exception {
+        // Create a new inventory item for concurrent testing
+        String concurrentId = "concurrent-test";
+        Inventory inventory = new Inventory();
+        inventory.setInventory_id(concurrentId);
+        inventory.setSupply(0);
+        inventory.setDemand(0);
+        inventoryController.postInventory(inventory);
+
+        // Create multiple threads to update the same inventory
+        int numThreads = 5;
+        ExecutorService executor = Executors.newFixedThreadPool(numThreads);
+        CountDownLatch latch = new CountDownLatch(numThreads);
+
+        // Each thread will try to update the supply
+        for (int i = 0; i < numThreads; i++) {
+            final int supply = i + 1;
+            executor.submit(() -> {
+                try {
+                    inventoryController.putInventory(inventory);
+                    latch.countDown();
+                } catch (Exception e) {
+                    e.printStackTrace();
+                }
+            });
+        }
+
+        // Wait for all threads to complete
+        boolean completed = latch.await(10, TimeUnit.SECONDS);
+        assertTrue(completed, "Concurrent updates should complete within timeout");
+
+        // Verify the final state
+        Inventory finalInventory = inventoryController.getInventory(concurrentId);
+        assertNotNull(finalInventory);
+        assertEquals(concurrentId, finalInventory.getInventory_id());
     }
 } 

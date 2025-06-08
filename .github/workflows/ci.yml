@@ -34,19 +34,6 @@ jobs:
     strategy:
       matrix:
         java: [17, 21]  # Test both LTS versions
-        
-    services:
-      cassandra:
-        image: cassandra:4.1
-        env:
-          CASSANDRA_CLUSTER_NAME: test-cluster
-        ports:
-          - 9042:9042
-        options: >-
-          --health-cmd "cqlsh -e 'describe cluster'"
-          --health-interval 30s
-          --health-timeout 10s
-          --health-retries 5
 
     steps:
     - name: Checkout code
@@ -65,69 +52,13 @@ jobs:
         key: ${{ runner.os }}-m2-${{ hashFiles('**/pom.xml') }}
         restore-keys: ${{ runner.os }}-m2
         
-    - name: Wait for Cassandra
-      run: |
-        echo "Waiting for Cassandra to be ready..."
-        for i in {1..30}; do
-          if docker exec $(docker ps -q --filter ancestor=cassandra:4.1) cqlsh -e "describe cluster" > /dev/null 2>&1; then
-            echo "Cassandra is ready!"
-            break
-          fi
-          echo "Waiting... ($i/30)"
-          sleep 10
-        done
-        
-    - name: Setup Cassandra Schema
-      run: |
-        echo "Setting up Cassandra keyspace and tables..."
-        
-        # Create the schema file
-        cat > schema.cql << 'EOF'
-        CREATE KEYSPACE IF NOT EXISTS inventory 
-        WITH replication = {'class': 'SimpleStrategy', 'replication_factor': 1};
-        
-        USE inventory;
-        
-        CREATE TABLE IF NOT EXISTS inventory(
-          inventory_id text,
-          supply int,
-          demand int, 
-          PRIMARY KEY(inventory_id)
-        );
-        EOF
-        
-        # Apply the schema
-        docker exec $(docker ps -q --filter ancestor=cassandra:4.1) cqlsh -f /tmp/schema.cql || \
-        docker exec -i $(docker ps -q --filter ancestor=cassandra:4.1) cqlsh < schema.cql
-        
-        # Insert test data
-        cat > data.cql << 'EOF'
-        USE inventory;
-        INSERT INTO inventory(inventory_id, supply, demand) values('1', 0, 0);
-        INSERT INTO inventory(inventory_id, supply, demand) values('2', 2, 0);
-        INSERT INTO inventory(inventory_id, supply, demand) values('3', 5, 0);
-        EOF
-        
-        docker exec -i $(docker ps -q --filter ancestor=cassandra:4.1) cqlsh < data.cql
-        
-        echo "Cassandra schema setup complete!"
-        
-    - name: 🔍 Verify Dependencies
-      run: |
-        echo "=== Dependency Analysis ==="
-        mvn dependency:tree
-        echo ""
-        echo "=== Security Vulnerabilities Check ==="
-        mvn org.owasp:dependency-check-maven:check || true
-        
     - name: 🏗️ Compile Project
       run: mvn clean compile -B
       
     - name: 🧪 Run Tests
       run: mvn test -B
       env:
-        CASSANDRA_HOST: localhost
-        CASSANDRA_PORT: 9042
+        SPRING_PROFILES_ACTIVE: test
         
     - name: 📦 Package Application
       run: mvn package -DskipTests -B
@@ -136,9 +67,7 @@ jobs:
       run: |
         echo "Starting application in background..."
         java -jar target/inventory-*.jar \
-          --spring.cassandra.contact-points=localhost:9042 \
-          --spring.cassandra.keyspace-name=inventory \
-          --spring.cassandra.local-datacenter=datacenter1 \
+          --spring.profiles.active=test \
           --server.port=8080 &
         
         APP_PID=$!
@@ -169,6 +98,14 @@ jobs:
         # Clean shutdown
         kill $APP_PID
         wait $APP_PID 2>/dev/null || true
+
+    - name: 🔍 Verify Dependencies
+      run: |
+        echo "=== Dependency Analysis ==="
+        mvn dependency:tree
+        echo ""
+        echo "=== Security Vulnerabilities Check ==="
+        mvn org.owasp:dependency-check-maven:check || true
         
     - name: 📊 Upload Test Results
       uses: actions/upload-artifact@v4
