@@ -1,0 +1,20 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<hazelcast xmlns="http://www.hazelcast.com/schema/config"
+           xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+           xsi:schemaLocation="http://www.hazelcast.com/schema/config
+           http://www.hazelcast.com/schema/config/hazelcast-config-5.0.xsd">
+    <instance-name>test-instance</instance-name>
+    <network>
+        <port>5900</port>
+        <port-auto-increment>false</port-auto-increment>
+        <join>
+            <multicast enabled="false"/>
+            <tcp-ip enabled="true">
+                <member>localhost</member>
+            </tcp-ip>
+        </join>
+    </network>
+    <map name="retailProductLocationMap">
+        <map-store enabled="true" class-name="com.noofinc.inventory.mapstore.RetailProductLocationMapStore"/>
+    </map>
+</hazelcast> 

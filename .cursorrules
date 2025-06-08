@@ -1,0 +1,104 @@
+# Cursor Testing Rules
+
+## Test Configuration Rules
+
+1. All test configurations MUST:
+   - Use `@TestConfiguration` instead of `@SpringBootApplication`
+   - Explicitly exclude production configurations using `@ComponentScan.Filter`
+   - Use `@ActiveProfiles("test")` for test-specific properties
+   - Mark test beans with `@Primary` to override production beans
+
+2. Test containers MUST:
+   - Use ephemeral ports
+   - Have appropriate timeouts (minimum 30 seconds)
+   - Include proper wait strategies
+   - Clean up resources after tests
+
+3. Test properties MUST:
+   - Be in `application-test.properties`
+   - Never use production values
+   - Use ephemeral ports for services
+
+## Code Organization Rules
+
+1. Test classes MUST:
+   - Use `@SpringBootTest` with explicit configuration classes
+   - Have meaningful test names
+   - Be focused and atomic
+   - Clean up test data after each test
+
+2. Test configurations MUST:
+   - Be isolated from production configurations
+   - Use proper component scanning filters
+   - Avoid auto-configuration conflicts
+
+## Anti-Patterns to Avoid
+
+1. NEVER:
+   - Mix production and test configurations
+   - Rely on fixed ports
+   - Assume external services are available
+   - Create dependencies between tests
+   - Rely on test execution order
+
+2. ALWAYS:
+   - Use ephemeral or mocked resources
+   - Clean up resources after tests
+   - Use `@DirtiesContext` when modifying context
+   - Verify container configuration and timeouts
+
+## Example Configurations
+
+1. Test Configuration:
+```java
+@TestConfiguration
+@EnableAutoConfiguration(exclude = {
+    CassandraAutoConfiguration.class,
+    CassandraDataAutoConfiguration.class
+})
+@ComponentScan(
+    basePackages = "com.noofinc.inventory",
+    excludeFilters = @ComponentScan.Filter(
+        type = FilterType.ASSIGNABLE_TYPE,
+        classes = CassandraConfig.class
+    )
+)
+```
+
+2. Test Container:
+```java
+@Container
+static final GenericContainer<?> container = new GenericContainer<>("image:tag")
+    .withExposedPorts(port)
+    .withStartupTimeout(Duration.ofSeconds(30))
+    .waitingFor(Wait.forListeningPort());
+```
+
+3. Test Class:
+```java
+@SpringBootTest(classes = TestApplicationConfig.class)
+@ActiveProfiles("test")
+public class TestContextLoadsTest {
+    @Test
+    public void contextLoads() {
+        // Test implementation
+    }
+}
+```
+
+## Troubleshooting Rules
+
+1. For Bean Conflicts:
+   - Check component scanning and exclusions
+   - Verify `@Primary` annotations
+   - Review configuration imports
+
+2. For Container Issues:
+   - Verify container configuration
+   - Check timeouts and wait strategies
+   - Review container logs
+
+3. For Property Issues:
+   - Ensure test properties are loaded
+   - Verify property resolution
+   - Check profile activation 

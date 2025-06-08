@@ -1,6 +1,8 @@
 package com.noofinc.domain;
 
+import java.lang.annotation.Annotation;
 import java.util.Date;
+import java.util.List;
 
 import uk.co.jemos.podam.common.AttributeStrategy;
 
@@ -15,8 +17,9 @@ public class DateStrategy implements AttributeStrategy<Date> {
      *
      * {@inheritDoc}
      */
-    public Date getValue() {
-            return new Date();
+    @Override
+    public Date getValue(Class<?> attrType, List<Annotation> attrAnnotations) {
+        return new Date();
     }
 
 }
