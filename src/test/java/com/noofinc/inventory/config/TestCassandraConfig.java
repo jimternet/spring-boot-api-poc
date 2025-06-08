@@ -61,4 +61,81 @@ public class TestCassandraConfig extends AbstractCassandraConfiguration {
                 
                 // Legacy Cassandra properties
                 "cassandra_keyspace=" + KEYSPACE_NAME,
-                "cassandra
+                "cassandra_contactpoints=" + host,
+                "cassandra_port=" + port,
+                "cassandra_local-datacenter=" + LOCAL_DATACENTER
+            ).applyTo(applicationContext.getEnvironment());
+        }
+    }
+
+    public static void cleanup() {
+        if (container != null && container.isRunning()) {
+            container.stop();
+        }
+    }
+
+    public static boolean isContainerRunning() {
+        return container != null && container.isRunning();
+    }
+
+    @Override
+    protected String getKeyspaceName() {
+        return KEYSPACE_NAME;
+    }
+
+    @Override
+    protected String getLocalDataCenter() {
+        return LOCAL_DATACENTER;
+    }
+
+    @Override
+    protected int getPort() {
+        return container != null ? container.getMappedPort(9042) : 9042;
+    }
+
+    @Override
+    protected String getContactPoints() {
+        return container != null ? container.getHost() : "localhost";
+    }
+
+    @Override
+    public SchemaAction getSchemaAction() {
+        return SchemaAction.CREATE_IF_NOT_EXISTS;
+    }
+
+    @Bean
+    @Primary
+    @Override
+    public CqlSessionFactoryBean cassandraSession() {
+        CqlSessionFactoryBean session = new CqlSessionFactoryBean();
+        session.setContactPoints(getContactPoints());
+        session.setKeyspaceName(getKeyspaceName());
+        session.setPort(getPort());
+        session.setLocalDatacenter(LOCAL_DATACENTER);
+        return session;
+    }
+
+    @Bean(name = "testCassandraMappingContext")
+    @Primary
+    public CassandraMappingContext mappingContext() {
+        return new CassandraMappingContext();
+    }
+
+    @Bean(name = "testCassandraConverter")
+    @Primary
+    public CassandraConverter converter() {
+        return new MappingCassandraConverter(mappingContext());
+    }
+
+    @Bean(name = "testCassandraTemplate")
+    @Primary
+    public CassandraTemplate cassandraTemplate(CqlSession session, CassandraConverter converter) {
+        return new CassandraTemplate(session, converter);
+    }
+
+    @Bean(name = "testCassandraAdminTemplate")
+    @Primary
+    public CassandraAdminTemplate cassandraAdminTemplate(CqlSession session, CassandraConverter converter) {
+        return new CassandraAdminTemplate(session, converter);
+    }
+} 

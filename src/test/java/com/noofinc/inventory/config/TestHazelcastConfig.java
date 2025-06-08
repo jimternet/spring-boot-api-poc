@@ -87,4 +87,10 @@ public class TestHazelcastConfig {
 
     @Bean
     @Primary
-    public
+    public HazelcastInstance hazelcastInstance() {
+        logger.info("Creating Hazelcast client instance...");
+        ClientConfig clientConfig = new ClientConfig();
+        clientConfig.setClusterName("test-cluster");
+        return HazelcastClient.newHazelcastClient(clientConfig);
+    }
+} 
