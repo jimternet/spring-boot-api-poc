@@ -8,7 +8,7 @@
 	<version>0.0.1-SNAPSHOT</version>
 	<packaging>jar</packaging>
 
-	<n>spring-boot-api-poc</n>
+	<name>spring-boot-api-poc</name>
 	<description>spring-boot-api-poc - Security Updated 2025</description>
 
 	<parent>
@@ -30,7 +30,6 @@
 		<dependency>
 			<groupId>org.springframework.boot</groupId>
 			<artifactId>spring-boot-starter-test</artifactId>
-			<scope>test</scope>
 		</dependency>
 		<!-- END BOOT -->
 
