@@ -9,12 +9,13 @@
 	<packaging>jar</packaging>
 
 	<name>spring-boot-api-poc</name>
-	<description>spring-boot-api-poc</description>
+	<description>spring-boot-api-poc - Security Updated 2025</description>
 
 	<parent>
 		<groupId>org.springframework.boot</groupId>
 		<artifactId>spring-boot-starter-parent</artifactId>
-	    <version>1.2.2.RELEASE</version>
+		<version>3.3.0</version>
+		<relativePath/> <!-- lookup parent from repository -->
 	</parent>
 
 	<dependencies>
@@ -33,70 +34,54 @@
 		</dependency>
 		<!-- END BOOT -->
 
+		<!-- Updated Spring Data Cassandra for Spring Boot 3.x -->
 		<dependency>
-			<groupId>org.springframework.data</groupId>
-			<artifactId>spring-data-cassandra</artifactId>
-        <version>1.1.2.BUILD-SNAPSHOT</version>
+			<groupId>org.springframework.boot</groupId>
+			<artifactId>spring-boot-starter-data-cassandra</artifactId>
 		</dependency>
 
-<!-- 		<dependency>
-			<groupId>org.cassandraunit</groupId>
-			<artifactId>cassandra-unit-spring</artifactId>
-			<version>2.0.2.2-SNAPSHOT</version>
-			<exclusions>
-				<exclusion>
-					<artifactId>slf4j-log4j12</artifactId>
-					<groupId>org.slf4j</groupId>
-				</exclusion>
-			</exclusions>
-		</dependency> -->
-
-
+		<!-- Updated Swagger/OpenAPI for Spring Boot 3.x -->
 		<dependency>
-			<groupId>com.mangofactory</groupId>
-			<artifactId>swagger-springmvc</artifactId>
-			<version>0.8.8</version>
+			<groupId>org.springdoc</groupId>
+			<artifactId>springdoc-openapi-starter-webmvc-ui</artifactId>
+			<version>2.5.0</version>
 		</dependency>
 
-		<dependency>
-			<groupId>org.ajar</groupId>
-			<artifactId>swagger-spring-mvc-ui</artifactId>
-			<version>0.1</version>
-			<scope>compile</scope>
-		</dependency>
-
-<!-- 		<dependency>
-			<groupId>com.hazelcast</groupId>
-			<artifactId>hazelcast-spring</artifactId>
-			<version>3.3.1</version>
-		</dependency> -->
-
+		<!-- Updated Hazelcast -->
 		<dependency>
 			<groupId>com.hazelcast</groupId>
 			<artifactId>hazelcast-all</artifactId>
-			<version>3.3.3</version>
+			<version>5.4.0</version>
 		</dependency>
 
-
+		<!-- Updated test data generation -->
 		<dependency>
 			<groupId>uk.co.jemos.podam</groupId>
 			<artifactId>podam</artifactId>
-			<version>4.1.0.RELEASE</version>
+			<version>8.0.1.RELEASE</version>
 		</dependency>
 	</dependencies>
 
 	<properties>
 		<project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
 		<start-class>com.noofinc.inventory.Application</start-class>
-		<java.version>1.8</java.version>
+		<java.version>17</java.version>
+		<maven.compiler.source>17</maven.compiler.source>
+		<maven.compiler.target>17</maven.compiler.target>
 	</properties>
 
 	<build>
 		<plugins>
 			<plugin>
-				<groupId>org.codehaus.mojo</groupId>
-				<artifactId>cassandra-maven-plugin</artifactId>
-				<version>2.0.0-1</version>
+				<groupId>org.springframework.boot</groupId>
+				<artifactId>spring-boot-maven-plugin</artifactId>
+			</plugin>
+			
+			<!-- Updated Cassandra plugin -->
+			<plugin>
+				<groupId>org.cassandraunit</groupId>
+				<artifactId>cassandra-unit-maven-plugin</artifactId>
+				<version>4.3.1.0</version>
 				<executions>
 					<execution>
 						<id>start-cassandra-integration-test</id>
@@ -114,27 +99,17 @@
 					</execution>
 				</executions>
 			</plugin>
-			<plugin>
-				<groupId>org.springframework.boot</groupId>
-				<artifactId>spring-boot-maven-plugin</artifactId>
-			</plugin>
 		</plugins>
 	</build>
 
-
 	<repositories>
 		<repository>
-			<id>spring-snapshots</id>
-			<name>Spring Snapshots</name>
-			<url>http://repo.spring.io/snapshot</url>
+			<id>spring-milestones</id>
+			<name>Spring Milestones</name>
+			<url>https://repo.spring.io/milestone</url>
 			<snapshots>
-				<enabled>true</enabled>
+				<enabled>false</enabled>
 			</snapshots>
-		</repository>
-		<repository>
-			<id>oss-jfrog-artifactory</id>
-			<name>oss-jfrog-artifactory-releases</name>
-			<url>http://oss.jfrog.org/artifactory/oss-release-local</url>
 		</repository>
 	</repositories>
 
