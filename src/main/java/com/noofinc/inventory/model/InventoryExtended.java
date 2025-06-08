@@ -2,7 +2,7 @@ package com.noofinc.inventory.model;
 
 import com.hazelcast.core.Hazelcast;
 import com.hazelcast.core.HazelcastInstance;
-import com.hazelcast.core.MultiMap;
+import com.hazelcast.multimap.MultiMap;
 
 public class InventoryExtended {
 	
@@ -76,7 +76,7 @@ public class InventoryExtended {
     	
         HazelcastInstance hazelcastInstance = Hazelcast.newHazelcastInstance();
 
-        MultiMap <String , InventoryExtended > map = hazelcastInstance.getMultiMap( "map" );
+        MultiMap<String, InventoryExtended> map = hazelcastInstance.getMultiMap("inventory_extended_map");
         
         
 

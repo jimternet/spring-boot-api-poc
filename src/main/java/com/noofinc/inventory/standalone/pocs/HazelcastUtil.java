@@ -7,7 +7,7 @@ import com.hazelcast.config.Config;
 import com.hazelcast.config.ManagementCenterConfig;
 import com.hazelcast.core.Hazelcast;
 import com.hazelcast.core.HazelcastInstance;
-import com.hazelcast.core.IMap;
+import com.hazelcast.map.IMap;
 import com.noofinc.inventory.model.Inventory;
 
 public class HazelcastUtil {
@@ -15,8 +15,8 @@ public class HazelcastUtil {
 	public static void main(String[] args) {
 		Config config = new Config();
 		ManagementCenterConfig managementCenterConfig = new ManagementCenterConfig();
-		managementCenterConfig.setEnabled(true);
-		managementCenterConfig.setUrl("http://localhost:8080/mancenter-3.3.2");
+		// managementCenterConfig.setEnabled(true);
+		// managementCenterConfig.setUrl("http://localhost:8080/mancenter-3.3.2");
 		config.setManagementCenterConfig(managementCenterConfig );
 		
 		HazelcastInstance h = Hazelcast.newHazelcastInstance(config);

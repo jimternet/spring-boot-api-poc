@@ -1,0 +1,60 @@
+version: 2
+updates:
+  # Maven dependencies
+  - package-ecosystem: "maven"
+    directory: "/"
+    schedule:
+      interval: "weekly"
+      day: "monday"
+      time: "09:00"
+    reviewers:
+      - "jimternet"
+    assignees:
+      - "jimternet"
+    commit-message:
+      prefix: "🔒 Security"
+      include: "scope"
+    labels:
+      - "security"
+      - "dependencies"
+    open-pull-requests-limit: 5
+    # Group security updates together
+    groups:
+      spring-security:
+        patterns:
+          - "org.springframework*"
+          - "org.springframework.boot*"
+          - "org.springframework.security*"
+      hazelcast-updates:
+        patterns:
+          - "com.hazelcast*"
+      documentation-tools:
+        patterns:
+          - "org.springdoc*"
+          - "*swagger*"
+          - "*openapi*"
+    # Auto-approve minor and patch updates for trusted dependencies
+    allow:
+      - dependency-type: "direct"
+        update-type: "version-update:semver-patch"
+      - dependency-type: "direct" 
+        update-type: "version-update:semver-minor"
+      - dependency-type: "indirect"
+        update-type: "version-update:semver-patch"
+
+  # GitHub Actions
+  - package-ecosystem: "github-actions"
+    directory: "/"
+    schedule:
+      interval: "weekly"
+      day: "monday"
+      time: "09:00"
+    reviewers:
+      - "jimternet"
+    commit-message:
+      prefix: "🚀 CI"
+      include: "scope"
+    labels:
+      - "ci"
+      - "github-actions"
+    open-pull-requests-limit: 3

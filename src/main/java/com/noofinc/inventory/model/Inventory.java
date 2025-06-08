@@ -2,12 +2,12 @@ package com.noofinc.inventory.model;
 
 import java.io.Serializable;
 
-import org.springframework.data.cassandra.mapping.PrimaryKey;
-import org.springframework.data.cassandra.mapping.Table;
+import org.springframework.data.cassandra.core.mapping.PrimaryKey;
+import org.springframework.data.cassandra.core.mapping.Table;
 import org.springframework.stereotype.Component;
 
 //@Table
-@Table(forceQuote=true, value="lame_inventory")
+@Table(value = "lame_inventory")
 @Component
 public class Inventory implements Serializable {
 	
