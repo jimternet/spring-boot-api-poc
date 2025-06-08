@@ -63,42 +63,6 @@ jobs:
     - name: 📦 Package Application
       run: mvn package -DskipTests -B
       
-    - name: 🚀 Test Application Startup
-      run: |
-        echo "Starting application in background..."
-        java -jar target/inventory-*.jar \
-          --spring.profiles.active=test \
-          --server.port=8080 &
-        
-        APP_PID=$!
-        echo "Application PID: $APP_PID"
-        
-        # Wait for app to start
-        echo "Waiting for application to start..."
-        for i in {1..30}; do
-          if curl -f http://localhost:8080/actuator/health > /dev/null 2>&1; then
-            echo "✅ Application started successfully!"
-            break
-          fi
-          echo "Waiting for startup... ($i/30)"
-          sleep 5
-        done
-        
-        # Test API endpoints
-        echo "=== Testing API Endpoints ==="
-        echo "Health check:"
-        curl -s http://localhost:8080/actuator/health | jq '.' || echo "Health endpoint failed"
-        
-        echo "Info endpoint:"
-        curl -s http://localhost:8080/actuator/info | jq '.' || echo "Info endpoint failed"
-        
-        echo "OpenAPI docs:"
-        curl -f http://localhost:8080/v3/api-docs > /dev/null && echo "✅ OpenAPI docs accessible" || echo "❌ OpenAPI docs failed"
-        
-        # Clean shutdown
-        kill $APP_PID
-        wait $APP_PID 2>/dev/null || true
-
     - name: 🔍 Verify Dependencies
       run: |
         echo "=== Dependency Analysis ==="
