@@ -79,7 +79,10 @@ jobs:
         
     - name: Setup Cassandra Schema
       run: |
-        docker exec $(docker ps -q --filter ancestor=cassandra:4.1) cqlsh -e "
+        echo "Setting up Cassandra keyspace and tables..."
+        
+        # Create the schema file
+        cat > schema.cql << 'EOF'
         CREATE KEYSPACE IF NOT EXISTS inventory 
         WITH replication = {'class': 'SimpleStrategy', 'replication_factor': 1};
         
@@ -91,11 +94,23 @@ jobs:
           demand int, 
           PRIMARY KEY(inventory_id)
         );
+        EOF
         
+        # Apply the schema
+        docker exec $(docker ps -q --filter ancestor=cassandra:4.1) cqlsh -f /tmp/schema.cql || \
+        docker exec -i $(docker ps -q --filter ancestor=cassandra:4.1) cqlsh < schema.cql
+        
+        # Insert test data
+        cat > data.cql << 'EOF'
+        USE inventory;
         INSERT INTO inventory(inventory_id, supply, demand) values('1', 0, 0);
         INSERT INTO inventory(inventory_id, supply, demand) values('2', 2, 0);
         INSERT INTO inventory(inventory_id, supply, demand) values('3', 5, 0);
-        "
+        EOF
+        
+        docker exec -i $(docker ps -q --filter ancestor=cassandra:4.1) cqlsh < data.cql
+        
+        echo "Cassandra schema setup complete!"
         
     - name: 🔍 Verify Dependencies
       run: |
@@ -123,6 +138,7 @@ jobs:
         java -jar target/inventory-*.jar \
           --spring.cassandra.contact-points=localhost:9042 \
           --spring.cassandra.keyspace-name=inventory \
+          --spring.cassandra.local-datacenter=datacenter1 \
           --server.port=8080 &
         
         APP_PID=$!
