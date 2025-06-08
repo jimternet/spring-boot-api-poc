@@ -49,9 +49,13 @@ public class InventoryController {
 
 	@RequestMapping(value = "/inventory/{inventory_id}", method = RequestMethod.GET)
 	@Operation(summary = "Get inventory by ID", description = "Returns a single inventory record by its ID")
-	public @ResponseBody Inventory getInventory(@PathVariable("inventory_id") String inventory_id) {
+	public @ResponseBody Inventory getInventory(@PathVariable("inventory_id") String inventory_id) throws Exception {
 		LOG.info("about to search for inventory with key : " + inventory_id);
-		return inventoryRepo.findOneInventory(inventory_id);
+		Inventory inventory = inventoryRepo.findOneInventory(inventory_id);
+		if (inventory == null) {
+			throw new Exception("Inventory record not found");
+		}
+		return inventory;
 	}
 
 	@RequestMapping(value = "/inventory/", method = RequestMethod.POST)
