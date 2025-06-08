@@ -8,7 +8,7 @@
 	<version>0.0.1-SNAPSHOT</version>
 	<packaging>jar</packaging>
 
-	<name>spring-boot-api-poc</name>
+	<n>spring-boot-api-poc</n>
 	<description>spring-boot-api-poc - Security Updated 2025</description>
 
 	<parent>
@@ -47,10 +47,17 @@
 			<version>2.5.0</version>
 		</dependency>
 
-		<!-- Updated Hazelcast -->
+		<!-- Modern Hazelcast 5.x - replaced hazelcast-all with modular approach -->
 		<dependency>
 			<groupId>com.hazelcast</groupId>
-			<artifactId>hazelcast-all</artifactId>
+			<artifactId>hazelcast</artifactId>
+			<version>5.4.0</version>
+		</dependency>
+		
+		<!-- Hazelcast Spring Integration for Spring Boot 3.x -->
+		<dependency>
+			<groupId>com.hazelcast</groupId>
+			<artifactId>hazelcast-spring</artifactId>
 			<version>5.4.0</version>
 		</dependency>
 
@@ -101,16 +108,5 @@
 			</plugin>
 		</plugins>
 	</build>
-
-	<repositories>
-		<repository>
-			<id>spring-milestones</id>
-			<name>Spring Milestones</name>
-			<url>https://repo.spring.io/milestone</url>
-			<snapshots>
-				<enabled>false</enabled>
-			</snapshots>
-		</repository>
-	</repositories>
 
 </project>
